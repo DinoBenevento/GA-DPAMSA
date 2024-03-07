@@ -1,7 +1,4 @@
 import dataset3
-import dataset4
-import dataset5
-import dataset6
 from env import Environment
 from dqn import DQN
 import config
@@ -10,11 +7,11 @@ import os
 import torch
 import sys
 
-dataset = dataset5
+dataset = dataset3
 
 
 def main():
-    config.device_name = "cuda:{}".format(sys.argv[1])
+    #config.device_name = "cuda:{}".format(sys.argv[1])
     config.device = torch.device(config.device_name)
     multi_train(dataset.file_name, 0, 25, truncate_file=True)
 
