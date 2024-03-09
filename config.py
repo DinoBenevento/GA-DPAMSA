@@ -24,17 +24,24 @@ delta = 0.05
 decrement_iteration = math.ceil(max_episode * 0.8 / (epsilon // delta))
 
 device_name = "cuda:1" if torch.cuda.is_available() else "cpu"
+device = 'cpu'
 
-weight_path = "../result/weight"
-score_path = "../result/score"
-report_path = "../result/report"
+weight_path_DPAMSA = "./result/weight"
+score_path = "./result/score"
+report_path_DPAMSA= "./result/reportDPAMSA"
+report_path_DPAMSA_GA= "./result/reportDPAMSA_GA"
+weight_path_DPAMSA_GA = "./result/weight"
 
 if not os.path.exists(score_path):
     os.makedirs(score_path)
-if not os.path.exists(weight_path):
-    os.makedirs(weight_path)
-if not os.path.exists(report_path):
-    os.makedirs(report_path)
+if not os.path.exists(weight_path_DPAMSA):
+    os.makedirs(weight_path_DPAMSA)
+if not os.path.exists(weight_path_DPAMSA_GA):
+    os.makedirs(weight_path_DPAMSA_GA)
+if not os.path.exists(report_path_DPAMSA):
+    os.makedirs(report_path_DPAMSA)
+if not os.path.exists(report_path_DPAMSA_GA):
+    os.makedirs(report_path_DPAMSA_GA)
 
 assert 0 < batch_size <= replay_memory_size, "batch size must be in the range of 0 to the size of replay memory."
 assert alpha > 0, "alpha must be greater than 0."
