@@ -1,4 +1,4 @@
-import dataset3
+import datasets.dataset1 as dataset1
 from env import Environment
 from dqn import DQN
 import config
@@ -7,7 +7,7 @@ import os
 import torch
 import sys
 
-dataset = dataset3
+dataset = dataset1
 
 
 def main():
@@ -32,11 +32,11 @@ def output_parameters():
     print("Device: {}".format(config.device_name))
 
 
-def multi_train(tag="", start=0, end=-1, truncate_file=False):
+def multi_train(tag="", start=0, end=-1, truncate_file=False,model_path='model'):
     output_parameters()
     print("Dataset number: {}".format(len(dataset.datasets)))
 
-    report_file_name = os.path.join(config.report_path, "{}.rpt".format(tag))
+    report_file_name = os.path.join(config.report_path_DPAMSA, "{}.rpt".format(tag))
 
     if truncate_file:
         with open(report_file_name, 'w') as _:
@@ -46,6 +46,11 @@ def multi_train(tag="", start=0, end=-1, truncate_file=False):
         if not hasattr(dataset, name):
             continue
         seqs = getattr(dataset, name)
+
+        try:
+            agent.load(model_path)
+        except:
+            pass
 
         env = Environment(seqs)
         agent = DQN(env.action_number, env.row, env.max_len, env.max_len * env.max_reward)
@@ -64,6 +69,7 @@ def multi_train(tag="", start=0, end=-1, truncate_file=False):
                 state = next_state
             agent.update_epsilon()
 
+        
         state = env.reset()
 
         while True:
@@ -72,8 +78,9 @@ def multi_train(tag="", start=0, end=-1, truncate_file=False):
             state = next_state
             if 0 == done:
                 break
-
+        
         env.padding()
+        agent.save(model_path)
         report = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n\n".format("NO: {}".format(name),
                                                          "AL: {}".format(len(env.aligned[0])),
                                                          "SP: {}".format(env.calc_score()),
@@ -83,7 +90,7 @@ def multi_train(tag="", start=0, end=-1, truncate_file=False):
                                                          "QTY: {}".format(len(env.aligned)),
                                                          "#\n{}".format(env.get_alignment()))
 
-        with open(os.path.join(config.report_path, "{}.rpt".format(tag)), 'a+') as report_file:
+        with open(os.path.join(config.report_path_DPAMSA, "{}.rpt".format(tag)), 'a+') as report_file:
             report_file.write(report)
 
 
@@ -129,6 +136,40 @@ def train(index):
     print("alignment: \n{}".format(env.get_alignment()))
     print("********************************\n")
 
+def inference(dataset,model_path, start=0, end=-1, tag=''):
+
+    report_file_name = os.path.join(config.report_path, "{}.rpt".format(tag))
+
+    for index, name in enumerate(dataset.datasets[start:end if end != -1 else len(dataset.datasets)], start):
+        if not hasattr(dataset, name):
+            continue
+        seqs = getattr(dataset, name)
+
+        env = Environment(seqs)
+        agent = DQN(env.action_number, env.row, env.max_len, env.max_len * env.max_reward)
+        agent.load(model_path)
+        state = env.reset()
+
+        while True:
+            action = agent.predict(state)
+            _, next_state, done = env.step(action)
+            state = next_state
+            if 0 == done:
+                break
+
+        env.padding()
+        report = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n\n".format("NO: {}".format(name),
+                                                            "AL: {}".format(len(env.aligned[0])),
+                                                            "SP: {}".format(env.calc_score()),
+                                                            "EM: {}".format(env.calc_exact_matched()),
+                                                            "CS: {}".format(
+                                                                env.calc_exact_matched() / len(env.aligned[0])),
+                                                            "QTY: {}".format(len(env.aligned)),
+                                                            "#\n{}".format(env.get_alignment()))
+
+        with open(os.path.join(config.report_path_DPAMSA, "{}.rpt".format(tag)), 'a+') as report_file:
+            report_file.write(report)
 
 if __name__ == "__main__":
+    #inference(dataset=dataset,model_path='model_test.pth',tag=dataset.file_name)
     main()
