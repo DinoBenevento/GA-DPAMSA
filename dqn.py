@@ -107,11 +107,11 @@ class DQN(ABC):
         loss.backward()
         self.optimizer.step()
 
-    def save(self, filename, path=config.weight_path):
+    def save(self, filename, path=config.weight_path_DPAMSA):
         torch.save(self.eval_net.state_dict(), os.path.join(path, "{}.pth".format(filename)))
         print("{} has been saved...".format(filename))
 
-    def load(self, filename, path=config.weight_path):
-        self.eval_net.load_state_dict(torch.load(os.path.join(path, "{}.pth".format(filename)),
+    def load(self, filename, path=config.weight_path_DPAMSA):
+        self.eval_net.load_state_dict(torch.load(os.path.join(path, "{}".format(filename)),
                                                  map_location=torch.device(config.device)))
         print("{} has been loaded...".format(filename))
