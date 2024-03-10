@@ -1,12 +1,12 @@
 import config
 
 nucleotides_map = {'A': 1, 'T': 2, 'C': 3, 'G': 4, 'a': 1, 't': 2, 'c': 3, 'g': 4, '-': 5}
+nucleotides = ['A', 'T', 'C', 'G', '-']
 
 class GA:
     def __init__(self,sequences):
         self.sequences = sequences
         self.population_size = config.GA_POPULATION_SIZE
-        self.number_iterations = config.GA_NUM_ITERATION
         self.population = []
         self.population_score = []
 
@@ -35,7 +35,7 @@ class GA:
     def selection_and_crossover(self):
         #Selection
         #Sort the population based on the score
-        population_score_sorted = sorted(self.population_score, key=lambda x: x[1], reverse=True)
+        population_score_sorted = sorted(self.population_score, key=lambda x: x[1])
         #Get the index of the most fitted individuals
         most_fitted_indexes = [item[0] for item in population_score_sorted[:config.GA_NUM_MOST_FIT_FOR_ITER]]
         #Delete individuals with the worst score 
@@ -78,15 +78,29 @@ class GA:
         #Update the population with new individals
         new_population = self.population + new_individuals
         self.population = new_population
+    
+    def get_alignment(self,chromosome):
+        alignment = ""
+        for i in range(len(chromosome)):
+            alignment += ''.join([nucleotides[chromosome[i][j] - 1] for j in range(len(chromosome[i]))]) + '\n'
+
+        return alignment.rstrip()
+    
+    def get_most_fitted_chromosome(self):
+        #Sort the population based on the score
+        population_score_sorted = sorted(self.population_score, key=lambda x: x[1], reverse=True)
+        most_fitted_individual = self.population[population_score_sorted[0][0]]     
+        
+        return most_fitted_individual,population_score_sorted[0][1]
 
 '''
 #Test
 
-import dataset3
+import datasets.dataset3 as dataset3
 
 dataset = dataset3 
 
-ga = GA(dataset.test2)
+ga = GA(dataset.test1)
 
 ga.generate_population()
 
