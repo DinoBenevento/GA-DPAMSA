@@ -7,8 +7,12 @@ GAP_PENALTY = -4
 MISMATCH_PENALTY = -4
 MATCH_REWARD = 4
 GA_POPULATION_SIZE = 50
-GA_NUM_ITERATION = 100
+GA_NUM_ITERATION = 2
 GA_NUM_MOST_FIT_FOR_ITER = 25
+
+#This depend from the training dataset given to the DQN
+AGENT_WINDOW_ROW = 3
+AGENT_WINDOW_COLUMN = 12
 
 update_iteration = 128
 
@@ -29,8 +33,9 @@ device = 'cpu'
 weight_path_DPAMSA = "./result/weight"
 score_path = "./result/score"
 report_path_DPAMSA= "./result/reportDPAMSA"
+weight_path_DPAMSA = "./result/weightDPAMSA"
+weight_path_DPAMSA_GA = "./result/weightDPAMSA_GA"
 report_path_DPAMSA_GA= "./result/reportDPAMSA_GA"
-weight_path_DPAMSA_GA = "./result/weight"
 
 if not os.path.exists(score_path):
     os.makedirs(score_path)

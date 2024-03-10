@@ -1,4 +1,4 @@
-import datasets.dataset1 as dataset1
+import datasets.dataset3 as dataset3
 from env import Environment
 from dqn import DQN
 import config
@@ -7,7 +7,7 @@ import os
 import torch
 import sys
 
-dataset = dataset1
+dataset = dataset3
 
 
 def main():
@@ -47,15 +47,15 @@ def multi_train(tag="", start=0, end=-1, truncate_file=False,model_path='model')
             continue
         seqs = getattr(dataset, name)
 
-        try:
-            agent.load(model_path)
-        except:
-            pass
-
         env = Environment(seqs)
         agent = DQN(env.action_number, env.row, env.max_len, env.max_len * env.max_reward)
         p = tqdm(range(config.max_episode))
         p.set_description(name)
+
+        try:
+            agent.load(model_path + '.pth')
+        except:
+            pass
 
         for _ in p:
             state = env.reset()
@@ -138,7 +138,7 @@ def train(index):
 
 def inference(dataset,model_path, start=0, end=-1, tag=''):
 
-    report_file_name = os.path.join(config.report_path, "{}.rpt".format(tag))
+    report_file_name = os.path.join(config.report_path_DPAMSA, "{}.rpt".format(tag))
 
     for index, name in enumerate(dataset.datasets[start:end if end != -1 else len(dataset.datasets)], start):
         if not hasattr(dataset, name):
@@ -171,5 +171,5 @@ def inference(dataset,model_path, start=0, end=-1, tag=''):
             report_file.write(report)
 
 if __name__ == "__main__":
-    #inference(dataset=dataset,model_path='model_test.pth',tag=dataset.file_name)
-    main()
+    inference(dataset=dataset,model_path='model',tag=dataset.file_name)
+    #main()

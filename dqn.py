@@ -112,6 +112,6 @@ class DQN(ABC):
         print("{} has been saved...".format(filename))
 
     def load(self, filename, path=config.weight_path_DPAMSA):
-        self.eval_net.load_state_dict(torch.load(os.path.join(path, "{}".format(filename)),
+        self.eval_net.load_state_dict(torch.load(os.path.join(path, "{}.pth".format(filename)),
                                                  map_location=torch.device(config.device)))
         print("{} has been loaded...".format(filename))
