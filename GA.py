@@ -32,7 +32,7 @@ class GA:
                             score += config.MISMATCH_PENALTY
             self.population_score.append((index_chromosome,score))
     
-    def selection_and_crossover(self):
+    def selection(self):
         #Selection
         #Sort the population based on the score
         population_score_sorted = sorted(self.population_score, key=lambda x: x[1])
@@ -42,7 +42,22 @@ class GA:
         for index in sorted(most_fitted_indexes,reverse=True):
             self.population.pop(index)
         
+    
+    def get_alignment(self,chromosome):
+        alignment = ""
+        for i in range(len(chromosome)):
+            alignment += ''.join([nucleotides[chromosome[i][j] - 1] for j in range(len(chromosome[i]))]) + '\n'
+
+        return alignment.rstrip()
+    
+    def get_most_fitted_chromosome(self):
+        #Sort the population based on the score
+        population_score_sorted = sorted(self.population_score, key=lambda x: x[1], reverse=True)
+        most_fitted_individual = self.population[population_score_sorted[0][0]]     
         
+        return most_fitted_individual,population_score_sorted[0][1]
+
+    def vertical_crossover(self):
         #Calculation of the mean length of a sequences, to calculate the position in which we cut every sequence in a chromosome
         number_of_nucleotides = []
         for genes in self.population[0]:
@@ -78,22 +93,42 @@ class GA:
         #Update the population with new individals
         new_population = self.population + new_individuals
         self.population = new_population
-    
-    def get_alignment(self,chromosome):
-        alignment = ""
-        for i in range(len(chromosome)):
-            alignment += ''.join([nucleotides[chromosome[i][j] - 1] for j in range(len(chromosome[i]))]) + '\n'
-
-        return alignment.rstrip()
-    
-    def get_most_fitted_chromosome(self):
-        #Sort the population based on the score
-        population_score_sorted = sorted(self.population_score, key=lambda x: x[1], reverse=True)
-        most_fitted_individual = self.population[population_score_sorted[0][0]]     
         
-        return most_fitted_individual,population_score_sorted[0][1]
+        return 
+    
+    def horizontal_crossover(self):
+        num_seq = len(self.population[0])
 
-'''
+        #Check if the number of sequence is even (I do not break exactly into two equal parts)
+        if num_seq % 2 == 0:
+            cut_index = num_seq // 2
+        else:
+            cut_index = (num_seq // 2) + 1
+        
+        new_indivisuals = []
+        for j in range(2): #Repeat two times to have a costant number of population (with one iteration we generate only the half of GA_NUM_MOST_FIT_FOR_ITER individuals)
+
+            for i in range(0, len(self.population) - 1,2): #Loop on population in steps of 2
+
+                parent1 = self.population[i]
+                parent2 = self.population[i+1]
+                first_half_parent1 = []
+                second_half_parent2 = []
+
+                #First half of genes from parent1
+                first_half_parent1 = parent1[:cut_index]
+                #Second half of genes from parent1
+                second_half_parent2 = parent2[cut_index:]
+
+                #Contruct the new individual
+                new_chromosome = first_half_parent1 + second_half_parent2
+                new_indivisuals.append(new_chromosome)
+        
+        new_population = self.population + new_indivisuals
+        self.population = new_population
+        
+        return
+
 #Test
 
 import datasets.dataset3 as dataset3
@@ -106,5 +141,7 @@ ga.generate_population()
 
 ga.calculate_fitness_score()
 
-ga.selection_and_crossover()
-'''
+ga.selection()
+
+ga.horizontal_crossover()
+
