@@ -1,4 +1,5 @@
 import config
+import random
 
 nucleotides_map = {'A': 1, 'T': 2, 'C': 3, 'G': 4, 'a': 1, 't': 2, 'c': 3, 'g': 4, '-': 5}
 nucleotides = ['A', 'T', 'C', 'G', '-']
@@ -19,6 +20,15 @@ class GA:
     def calculate_fitness_score(self):
         self.population_score = []
         for index_chromosome,chromosome in enumerate(self.population):
+            #When RL is applied only on a sub-board, some sequences may become longer because of gaps
+            #then gaps are added at the end of all sequences before the sum-of-pairs calculation
+            #TODO: make as a function, maybe we have to use it also after crossover, can happen that RL agent goes in a sub-board where there are some holes?
+            gene_max_len = max(len(gene) for gene in chromosome)
+            for gene in chromosome: 
+                while len(gene) < gene_max_len:
+                    gene.append(5)
+        
+            #gene_min_length = min(len(gene) for gene in chromosome)
             num_sequences = len(chromosome)
             score = 0
             for i in range(len(chromosome[0])):
@@ -106,12 +116,12 @@ class GA:
             cut_index = (num_seq // 2) + 1
         
         new_indivisuals = []
-        for j in range(2): #Repeat two times to have a costant number of population (with one iteration we generate only the half of GA_NUM_MOST_FIT_FOR_ITER individuals)
-
-            for i in range(0, len(self.population) - 1,2): #Loop on population in steps of 2
-
-                parent1 = self.population[i]
-                parent2 = self.population[i+1]
+        while (len(self.population) + len(new_indivisuals) < config.GA_POPULATION_SIZE): #Repeat until we reach again the number of desidered individual in the population
+            #for i in range(0, len(self.population) - 1,2): #Loop on population in steps of 2
+                index_parent1 = random.randint(0,len(self.population) - 1)
+                index_parent2 = random.randint(0,len(self.population) - 1)
+                parent1 = self.population[index_parent1]
+                parent2 = self.population[index_parent2]
                 first_half_parent1 = []
                 second_half_parent2 = []
 
@@ -130,7 +140,7 @@ class GA:
         return
 
 #Test
-
+'''
 import datasets.dataset3 as dataset3
 
 dataset = dataset3 
@@ -145,3 +155,4 @@ ga.selection()
 
 ga.horizontal_crossover()
 
+'''
