@@ -1,4 +1,4 @@
-import datasets.dataset3 as dataset1
+import datasets.dataset1 as dataset1
 from GA import GA
 import torch
 import os
@@ -65,6 +65,9 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
 
             return 
         
+        #Calculate all the possible different sub-boards from the main board (we want to run the RL agent in diefferent sub-board for different individual)
+        unique_ranges = utils.get_all_different_sub_range(first_individual,config.AGENT_WINDOW_ROW,config.AGENT_WINDOW_COLUMN)
+        
         for i in range(config.GA_NUM_ITERATION):
             
             used_ranges = []
@@ -75,23 +78,40 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
                 #Define sub-board size (where RL agent perform mutation)
 
                 #If we have explored all the zone in the Game board, go to the next iteration
-                if(len(used_ranges) == config.NUM_TOTAL_RANGES):
+                if(len(used_ranges) == len(unique_ranges)):
                     break
 
-                #On every individual, we want to use the RL agent in a different position on the game board
-                #Continue to generate number until a range not explored is found
-                while True:
-                    from_row = random.randint(0, len(individual) - config.AGENT_WINDOW_ROW)
-                    from_column = random.randint(0,sequence_min_length - config.AGENT_WINDOW_COLUMN)
+                #Choose a range in a random way
+                #We want to use the RL agent in a different position on the sub-game board
+                range_index = random.randint(0,len(unique_ranges) - 1)
+                range_selected = unique_ranges[range_index]
 
-                    to_row = from_row + config.AGENT_WINDOW_ROW
-                    to_column = from_column + config.AGENT_WINDOW_COLUMN
-
-                    if(utils.check_overlap((from_row,to_row,from_column,to_column),used_ranges) == False):
-                        used_ranges.append((from_row,to_row,from_column,to_column))
-                        break
+                used_ranges.append(range_selected)
 
                 #Construct the sub-board
+                from_row, to_row, from_column, to_column = range_selected
+                row_genes = individual[from_row:to_row]
+                sub_board = []
+
+
+                ##To prevent to fill the space with all gaps is better to have that the sub-board is a multiple of the main board in terms of row x column
+                ##If the main board can't be perfectly divide in slice of size AGENT_WINDOW_ROW, a raw with all GAP is added to fill the space (the RL agent won't work if size is less than the size in the training)
+                fake_row_counter = 0
+                while (len(row_genes) < config.AGENT_WINDOW_ROW):
+                    all_gap_row = []
+                    while (len(all_gap_row) < config.AGENT_WINDOW_COLUMN):
+                        all_gap_row.append(5)
+                    fake_row_counter = fake_row_counter + 1
+                    row_genes.append(all_gap_row)
+
+                for genes in row_genes:
+                    sub_genes = genes[from_column:to_column]  
+                    #If the main board can't be perfectly divide in slice of size AGENT_WINDOW_COLUMN, GAP is added to fill the space (the RL agent won't work if size is less than the size in the training) 
+                    while len(sub_genes) < config.AGENT_WINDOW_COLUMN:
+                        sub_genes.append(5)
+                    sub_board.append(sub_genes)
+
+                '''
                 sub_board = []
                 row_selected = []
                 for index,genes in enumerate(individual):
@@ -99,7 +119,7 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
                         sub_genes = genes[from_column:to_column]  #Select only the number of nucleotides beetwen the column range
                         row_selected.append(index)          #Save index of row selected
                         sub_board.append(sub_genes)
-                
+                '''
                 #Perform Mutation on the sub-board with RL
                 env = Environment(sub_board)
                 agent = DQN(env.action_number, env.row, env.max_len, env.max_len * env.max_reward)
@@ -115,17 +135,18 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
                 
                 env.padding()
                 #Put mutated genes in the right position in the individual
+                genes_to_mutate = individual[from_row:to_row]
                 for index,sequence in enumerate(env.aligned):
-                    index_gene = row_selected[index]  #Recover the right genes from the individual
-                    genes_to_mutate = individual[index_gene]
-                    genes_to_mutate[from_column:to_column+1] = sequence
-                    individual[index_gene] = genes_to_mutate
-            
+                        if(index < len(genes_to_mutate) - 1): #This is necessary due to the row with all GAP added in case the number of row for the window is not multiple of the main board rows
+                            genes_to_mutate[index][from_column:to_column] = sequence
+                individual[from_row:to_row] = genes_to_mutate
+                
             #Calculate the fitness score for all individuals
             ga.calculate_fitness_score()
 
-            #Select the most fitted individuals and perform crossover
-            ga.selection_and_crossover()
+            ga.selection()
+
+            ga.horizontal_crossover()
         
 
             most_fitted_chromosome,sum_pairs_score = ga.get_most_fitted_chromosome()
