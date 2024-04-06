@@ -11,11 +11,6 @@ import utils
 
 dataset = dataset1
 
-def main():
-    #config.device_name = "cuda:{}".format(sys.argv[1])
-    config.device = torch.device(config.device_name)
-    #multi_train(dataset.file_name, 0, 25, truncate_file=True)
-
 
 def output_parameters():
     print("Gap penalty: {}".format(config.GAP_PENALTY))
@@ -44,11 +39,12 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
         with open(report_file_name, 'w') as _:
             _.truncate()
 
-    for index, name in enumerate(dataset.datasets[start:end if end != -1 else len(dataset.datasets)], start):
-        if not hasattr(dataset, name):
-            continue
-        seqs = getattr(dataset, name)
+    for dataset_name in dataset.datasets:
         
+        if not hasattr(dataset, dataset_name):
+            continue
+        seqs = getattr(dataset, dataset_name)
+
         ga = GA(seqs)
         ga.generate_population()
 
@@ -65,13 +61,8 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
 
             return 
         
-        #Calculate all the possible different sub-boards from the main board (we want to run the RL agent in diefferent sub-board for different individual)
-        unique_ranges = utils.get_all_different_sub_range(first_individual,config.AGENT_WINDOW_ROW,config.AGENT_WINDOW_COLUMN)
-        
         for i in range(config.GA_NUM_ITERATION):
-            
-            used_ranges = []
-
+        
             #Mutation with the RL agent
             ga.random_mutation(model_path)
                 
@@ -89,7 +80,9 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
         most_fitted_chromosome_converted = ga.get_alignment(most_fitted_chromosome)
         print(f"SP:{sum_pairs_score}")
         print(f"Alignment:\n{most_fitted_chromosome_converted}")
+        report = f"SP:{sum_pairs_score}\nAlignment:\n{most_fitted_chromosome_converted}"
+        with open(os.path.join(config.report_path_DPAMSA_GA, "{}.rpt".format(tag)), 'a+') as report_file:
+            report_file.write(report)
             
 if __name__ == "__main__":
-    #inference(dataset=dataset,model_path='model_test.pth',tag=dataset.file_name)
-    inference()
+    inference(model_path='model',tag=dataset.file_name)
