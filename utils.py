@@ -1,4 +1,5 @@
 import config
+import random
 
 def is_overlap(range1, range2):
     from_row1, to_row1, from_column1, to_column1 = range1
@@ -67,6 +68,15 @@ def calculate_worst_fitted_sub_board(individual):
 
     return worst_score_subboard
     
+#Function for generate a list of num_random_el elements of different random number
+def casual_number_generation(start_range, final_range, num_random_el):
+    generated_number = set()
+    while len(generated_number) < num_random_el:
+        num = random.randint(start_range, final_range)
+        generated_number.add(num)
+    
+    return list(generated_number)
+
     ''' This is util for the mainGA to get the sub board in the correct way and also for replace after the mutation
     row_genes = individual[from_row:to_row]
     for genes in row_genes:

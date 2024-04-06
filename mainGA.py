@@ -83,13 +83,17 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
 
                 #Choose a range in a random way
                 #We want to use the RL agent in a different position on the sub-game board
-                range_index = random.randint(0,len(unique_ranges) - 1)
-                range_selected = unique_ranges[range_index]
-
-                used_ranges.append(range_selected)
+                range_founded = False
+                while range_founded == False: 
+                    range_index = random.randint(0,len(unique_ranges) - 1)
+                    range_selected = unique_ranges[range_index]
+                    if range_selected not in used_ranges:
+                        used_ranges.append(range_selected)
+                        range_founded = True
 
                 #Construct the sub-board
                 from_row, to_row, from_column, to_column = range_selected
+                #Get only the selected row
                 row_genes = individual[from_row:to_row]
                 sub_board = []
 
@@ -111,15 +115,6 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
                         sub_genes.append(5)
                     sub_board.append(sub_genes)
 
-                '''
-                sub_board = []
-                row_selected = []
-                for index,genes in enumerate(individual):
-                    if index >= from_row and index <= to_row:   #Get only element with index beetwen the range (number of sequence)
-                        sub_genes = genes[from_column:to_column]  #Select only the number of nucleotides beetwen the column range
-                        row_selected.append(index)          #Save index of row selected
-                        sub_board.append(sub_genes)
-                '''
                 #Perform Mutation on the sub-board with RL
                 env = Environment(sub_board)
                 agent = DQN(env.action_number, env.row, env.max_len, env.max_len * env.max_reward)
@@ -137,8 +132,8 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
                 #Put mutated genes in the right position in the individual
                 genes_to_mutate = individual[from_row:to_row]
                 for index,sequence in enumerate(env.aligned):
-                        if(index < len(genes_to_mutate) - 1): #This is necessary due to the row with all GAP added in case the number of row for the window is not multiple of the main board rows
-                            genes_to_mutate[index][from_column:to_column] = sequence
+                        #if(index < len(genes_to_mutate) - 1): #This is necessary due to the row with all GAP added in case the number of row for the window is not multiple of the main board rows
+                        genes_to_mutate[index][from_column:to_column] = sequence
                 individual[from_row:to_row] = genes_to_mutate
                 
             #Calculate the fitness score for all individuals
