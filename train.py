@@ -1,4 +1,4 @@
-import datasets.dataset3 as dataset3
+import datasets.dataset1 as dataset1
 from env import Environment
 from dqn import DQN
 import config
@@ -7,7 +7,7 @@ import os
 import torch
 import sys
 
-dataset = dataset3
+dataset = dataset1
 
 
 def main():
