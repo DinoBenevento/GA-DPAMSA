@@ -4,13 +4,5 @@ datasets = ['test1']
 test1 = [
     "GTTGTACGAAAA",
     "ATCCTGCCGCAA",
-    "ATGCAAACCGGT",
+    "TTTAATGCACAC",
 ]
-
-'''
-test2 = [
-    "TTTTAGCTAGCTAGCTTTTTAGCTAGCTAGCT",
-    "TTTTAGCTAGCTAGCT",
-    "TTTTAGCTAGCTAGCT",
-]
-'''

@@ -1,7 +1,7 @@
 import random
 
 BP = 20
-NUM_SEQUENCES = 5
+NUM_SEQUENCES = 6
 NUM_DATASET = 20
 FILE_NAME_REPORT = './dataset1'
 FILE_NAME_SCRIPT_OUTPUT = './datasets/dataset1.py'
