@@ -32,22 +32,19 @@ delta = 0.05
 
 decrement_iteration = math.ceil(max_episode * 0.8 / (epsilon // delta))
 
-device_name = "cuda:1" if torch.cuda.is_available() else "cpu"
+device_name = "cuda:0" if torch.cuda.is_available() else "cpu"
 device = 'cpu'
 
 weight_path_DPAMSA = "./result/weight"
 score_path = "./result/score"
 report_path_DPAMSA= "./result/reportDPAMSA"
 weight_path_DPAMSA = "./result/weightDPAMSA"
-weight_path_DPAMSA_GA = "./result/weightDPAMSA_GA"
 report_path_DPAMSA_GA= "./result/reportDPAMSA_GA"
 
 if not os.path.exists(score_path):
     os.makedirs(score_path)
 if not os.path.exists(weight_path_DPAMSA):
     os.makedirs(weight_path_DPAMSA)
-if not os.path.exists(weight_path_DPAMSA_GA):
-    os.makedirs(weight_path_DPAMSA_GA)
 if not os.path.exists(report_path_DPAMSA):
     os.makedirs(report_path_DPAMSA)
 if not os.path.exists(report_path_DPAMSA_GA):
