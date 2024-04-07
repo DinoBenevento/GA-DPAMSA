@@ -53,8 +53,8 @@ def multi_train(tag="", truncate_file=False,model_path='model'):
         p.set_description(dataset_name)
 
         try:
-            agent.load(model_path + '.pth')
-        except:
+            agent.load(model_path)
+        except Exception as e:
             pass
 
         for _ in p:
