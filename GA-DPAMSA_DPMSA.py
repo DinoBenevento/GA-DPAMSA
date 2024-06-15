@@ -40,7 +40,7 @@ def run_benchmark():
         sp_value = None
         for line in report_file:
             line = line.strip()
-            if line.startswith("Dataset name:"):
+            if line.startswith("File name:"):
                 if dataset_name is not None and sp_value is not None:
                     if dataset_name in data:
                         data[dataset_name]['GA_SP'] = sp_value
@@ -59,7 +59,7 @@ def run_benchmark():
     # Write data to the CSV file
     with open(csv_filename, mode='w', newline='') as file_csv:
         writer = csv.writer(file_csv)
-        writer.writerow(["Dataset name", "DPAMSA_SP", "GA_SP"])
+        writer.writerow(["File name", "DPAMSA_SP", "GA_SP"])
         for dataset_name, values in data.items():
             dpamsa_sp = values.get('DPAMSA_SP', '')
             ga_sp = values.get('GA_SP', '')
