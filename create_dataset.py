@@ -1,30 +1,94 @@
 import random
+import os
+import glob
 
-BP = 20
-NUM_SEQUENCES = 6
-NUM_DATASET = 20
-FILE_NAME_REPORT = './dataset1'
-FILE_NAME_SCRIPT_OUTPUT = './datasets/dataset1.py'
-nucleotides_map = {'A': 1, 'T': 2, 'C': 3, 'G': 4}
+# Genera 5 sequenze casuali e le scrive in un file FASTA
+num_sequences = 6
+sequence_length = 20
+mutation_rate = 0.1  # Tasso di mutazione del 10%
+number_of_dataset = 10
+DATASET_NAME = 'DPAMSA_vs_GA'
 
-datasets = []
-for i in range(NUM_DATASET):
-    sequences = []  
-    for j in range(NUM_SEQUENCES):
-        sequence = ''
-        for k in range(BP):
-          sequence = sequence + random.choice(list(nucleotides_map.keys()))
-        sequences.append(sequence)
-    datasets.append(sequences)
+FILE_NAME_SCRIPT_OUTPUT = f'./datasets/{DATASET_NAME}.py'
+FASTA_OUTPUT = f'./datasets/fasta_files/{DATASET_NAME}'
 
-with open(FILE_NAME_SCRIPT_OUTPUT, 'w') as file:
-    file.write(f"file_name = '{FILE_NAME_REPORT}'\n\n")
-    file.write(f"datasets = [")
-    for index,dataset in enumerate(datasets):
-        file.write(f"'dataset{index}',")
-    file.write("]\n\n")
-    for index,dataset in enumerate(datasets):
-        file.write(f"dataset{index} = [\n")
-        for sequence in dataset:
-            file.write(f'        "{sequence}",\n')
-        file.write("    ]\n\n")
+if not os.path.exists(FASTA_OUTPUT):
+    os.makedirs(FASTA_OUTPUT)
+
+
+def generate_random_dna_sequence(BP):
+    nucleotides = ['A', 'T', 'C', 'G']
+    return ''.join(random.choice(nucleotides) for _ in range(BP))
+
+def mutate_sequence(sequence, mutation_rate):
+    nucleotides = ['A', 'T', 'C', 'G']
+    mutated_sequence = list(sequence)
+    for i in range(len(mutated_sequence)):
+        if random.random() < mutation_rate:
+            mutated_sequence[i] = random.choice(nucleotides)
+    return ''.join(mutated_sequence)
+
+def write_fasta_file(filename, sequences):
+    with open(filename, 'w') as f:
+        for i, seq in enumerate(sequences):
+            header = f">Sequence_{i+1}\n"  # Genera un header unico per ogni sequenza
+            f.write(header)
+            f.write(seq + "\n")
+
+def write_dataset_dpamsa(fasta_files, output_file):
+    sequences = {}
+    for file in fasta_files:
+        sequences[file] = {}
+        with open(file, 'r') as f:
+            lines = f.readlines()
+            seq = ''
+            seq_name = ''
+            for line in lines:
+                if line.startswith('>'):
+                    if seq_name != '':
+                        sequences[file][seq_name] = seq
+                    seq_name = line.strip().lstrip('>')
+                    seq = ''
+                else:
+                    seq += line.strip()
+            if seq_name != '':
+                sequences[file][seq_name] = seq
+    fasta_file_names = []
+    for file in fasta_files:
+        filename = os.path.basename(file).split('.')[0]
+        fasta_file_names.append(filename)
+
+    file_content = f"""
+file_name = '{os.path.basename(output_file)}'
+
+datasets = {fasta_file_names}
+"""
+    for i, filename in enumerate(fasta_files):  # Crea dataset0, dataset1, ... fino a quanto necessario
+        dataset_name = f"dataset{i}"
+        if filename in sequences:
+            dataset_sequences = sequences[filename]
+            file_content += f"\n{fasta_file_names[i]} = "
+            sequence_list = list(dataset_sequences.values())
+            file_content += f'{sequence_list}\n'
+
+    # Scrivi il contenuto nel file Python
+    with open(output_file, 'w') as f:
+        f.write(file_content)
+        
+fasta_files = []
+for dataset in range(number_of_dataset):
+    sequences = []
+    for _ in range(num_sequences):
+        sequence = generate_random_dna_sequence(sequence_length)
+        mutated_sequence = mutate_sequence(sequence, mutation_rate)
+        sequences.append(mutated_sequence)
+
+    fasta_filename = f'test{dataset}'+ '.fasta'
+    fasta_filename = os.path.join(FASTA_OUTPUT,fasta_filename)
+    write_fasta_file(fasta_filename, sequences)
+
+    fasta_files.append(fasta_filename)
+    print(f"Fasta file created in {fasta_filename}")
+
+write_dataset_dpamsa(fasta_files,FILE_NAME_SCRIPT_OUTPUT)
+print(f"Dataset file created in {FILE_NAME_SCRIPT_OUTPUT}")
