@@ -1,4 +1,4 @@
-import datasets.dataset1 as dataset1
+import datasets.dataset1_3x30bp as dataset1
 from env import Environment
 from dqn import DQN
 import config
@@ -13,7 +13,7 @@ dataset = dataset1
 def main():
     config.device = torch.device(config.device_name)
 
-    multi_train(dataset.file_name)
+    multi_train(dataset.file_name,model_path='model_3x30')
 
 
 def output_parameters():
