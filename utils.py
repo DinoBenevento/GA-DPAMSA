@@ -12,6 +12,7 @@ def is_overlap(range1, range2):
     return overlap_row and overlap_column
 
 #TODO: can generate error in case the sub-board is not a multiple of the main-board in terms of number of row and column
+#Possibile fix: controllare to_column con il valore effettivo del numero di colonne, se to_column >, allora to_column diventa pari al numero di colonne totali della board
 def get_sum_of_pairs(chromosome,from_row,to_row,from_column,to_column):
     score = 0
     for i in range(from_column, to_column):
@@ -49,7 +50,9 @@ def get_all_different_sub_range(individual,m_prime,n_prime):
             to_column = j + n_prime
             #Check if the range is a range already covered by another interval (we want all different sub-board)
             if(check_overlap((from_row,to_row,from_column,to_column),unique_ranges) == False):
-                        unique_ranges.append((from_row,to_row,from_column,to_column))
+                                #we want only equal range, if we create gaps and the board is if we create gap and the board is not partitionable, we only take the largest number of sub-boards of the same size as the board on which the algorithm was trained
+                        if not (to_row > m or to_column > n):    
+                            unique_ranges.append((from_row,to_row,from_column,to_column))
     
     return unique_ranges
 
@@ -77,6 +80,36 @@ def casual_number_generation(start_range, final_range, num_random_el):
     
     return list(generated_number)
 
+#Return the first num_individuals individuals with the worst score
+def get_index_of_the_worst_fitted_individuals(population_sorted,num_individuals):
+    #Sort the population based on the score
+    population_score_sorted = sorted(population_sorted, key=lambda x: x[1])
+    #Get the index of the worst fitted individuals
+    worst_fitted_individual = [item[0] for item in population_score_sorted[:num_individuals]]
+    
+    return worst_fitted_individual
+
+def check_if_there_are_all_gaps(row,from_index):
+    for i in range(from_index, len(row)):
+        if row[i] != 5:
+            return False    
+    return from_index - 1
+
+def clean_unnecessary_gaps(aligned_sequence):
+    indexes_to_start_clean = []
+    for index_el,row in enumerate(aligned_sequence):
+        for index_col,el in enumerate(row):
+            if el == 5:
+                result = check_if_there_are_all_gaps(row,index_col + 1)
+                if result != False:
+                    indexes_to_start_clean.append(result)
+                    break
+    try:
+        index_to_start = max(indexes_to_start_clean)
+        for row in aligned_sequence:
+            del row[index_to_start:len(row)]
+    except:
+        return
     ''' This is util for the mainGA to get the sub board in the correct way and also for replace after the mutation
     row_genes = individual[from_row:to_row]
     for genes in row_genes:
@@ -89,12 +122,14 @@ def casual_number_generation(start_range, final_range, num_random_el):
 '''
 #Test
 
-matrx = [[1,2,3,4,5,2,1,3,4,5,5,5,1,2,3,4,5,2,1,3,4,1,2,2],
-        [1,2,3,4,5,2,1,3,4,5,5,5,2,3,4,5,2,1,3,4,5,1,5,3],
-        [1,2,3,4,5,2,1,3,4,5,5,5,2,3,4,5,2,1,3,4,5,1,2,5],
-        [1,2,3,4,5,2,1,3,4,5,5,5,2,3,4,5,2,1,3,4,5,1,1,5],
-        [1,2,3,4,5,2,1,3,4,5,5,5,2,3,4,5,2,1,3,4,5,1,1,5],
-        [1,2,3,4,5,2,1,3,4,5,5,5,2,3,4,5,2,1,3,4,5,1,1,5]]
+matrx = [[1,2,3,4,5,2,1,3,4,5,5,5,1,2,3,4,5,2,1,3,4,1,2,2,5,5,5,5,5,5,5,5],
+        [1,2,3,4,5,2,1,3,4,5,5,5,2,3,4,5,2,1,3,4,5,1,5,3,5,5,5,5,5,5,5,5],
+        [1,2,3,4,5,2,1,3,4,5,5,5,2,3,4,5,2,1,3,4,5,1,2,5,3,2,1,1,1,5,5,5],
+        [1,2,3,4,5,2,1,3,4,5,5,5,2,3,4,5,2,1,3,4,5,1,1,5,1,2,3,4,5,5,5,5],
+        [1,2,3,4,5,2,1,3,4,5,5,5,2,3,4,5,2,1,3,4,5,1,1,5,5,5,5,5,5,5,5,5],
+        [1,2,3,4,5,2,1,3,4,5,5,5,2,3,4,5,2,1,3,4,5,1,1,5,5,5,5,5,5,5,5,5]]
 
-print(calculate_worst_fitted_sub_board(matrx))
+clean_unnecessary_gaps(matrx)
+for el in matrx:
+    print(el)
 '''

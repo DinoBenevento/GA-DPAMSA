@@ -6,16 +6,17 @@ import math
 GAP_PENALTY = -4
 MISMATCH_PENALTY = -4
 MATCH_REWARD = 4
-GA_POPULATION_SIZE = 50
-GA_NUM_ITERATION = 50
-GA_NUM_MOST_FIT_FOR_ITER = 25
+GA_POPULATION_SIZE = 5
+GA_NUM_ITERATION = 3
+GA_NUM_MOST_FIT_FOR_ITER = 2
+GA_PERCENTAGE_INDIVIDUALS_TO_MUTATE_FOR_ITER = 0.20 #20%
 
 #This depend from the training dataset given to the DQN
-AGENT_WINDOW_ROW = 3
-AGENT_WINDOW_COLUMN = 12
+AGENT_WINDOW_ROW = 6
+AGENT_WINDOW_COLUMN = 20
 
 DATASET_ROW = 6
-DATASET_COLUMN = 24
+DATASET_COLUMN = 20
 
 NUM_TOTAL_RANGES = int((DATASET_ROW / AGENT_WINDOW_ROW) * (DATASET_COLUMN/AGENT_WINDOW_COLUMN))
 
@@ -40,6 +41,7 @@ score_path = "./result/score"
 report_path_DPAMSA= "./result/reportDPAMSA"
 weight_path_DPAMSA = "./result/weightDPAMSA"
 report_path_DPAMSA_GA= "./result/reportDPAMSA_GA"
+benchmark_path = './result/benchmark'
 
 if not os.path.exists(score_path):
     os.makedirs(score_path)
@@ -49,6 +51,8 @@ if not os.path.exists(report_path_DPAMSA):
     os.makedirs(report_path_DPAMSA)
 if not os.path.exists(report_path_DPAMSA_GA):
     os.makedirs(report_path_DPAMSA_GA)
+if not os.path.exists(benchmark_path):
+    os.makedirs(benchmark_path)
 
 assert 0 < batch_size <= replay_memory_size, "batch size must be in the range of 0 to the size of replay memory."
 assert alpha > 0, "alpha must be greater than 0."

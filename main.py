@@ -167,7 +167,7 @@ def inference(dataset,model_path, start=0, end=-1, tag=''):
                                                             "QTY: {}".format(len(env.aligned)),
                                                             "#\n{}".format(env.get_alignment()))
 
-        with open(os.path.join(config.report_path_DPAMSA, "{}.rpt".format(tag)), 'a+') as report_file:
+        with open(os.path.join(config.report_path_DPAMSA, "{}.rpt".format(tag)), 'a') as report_file:
             report_file.write(report)
 
 if __name__ == "__main__":

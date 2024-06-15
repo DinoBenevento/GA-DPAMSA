@@ -32,13 +32,12 @@ class GA:
         for index_chromosome,chromosome in enumerate(self.population):
             #When RL is applied only on a sub-board, some sequences may become longer because of gaps
             #then gaps are added at the end of all sequences before the sum-of-pairs calculation
-            #TODO: make as a function, maybe we have to use it also after crossover, can happen that RL agent goes in a sub-board where there are some holes?
+            #can happen that RL agent goes in a sub-board where there are some holes?
             gene_max_len = max(len(gene) for gene in chromosome)
             for gene in chromosome: 
                 while len(gene) < gene_max_len:
                     gene.append(5)
         
-            #gene_min_length = min(len(gene) for gene in chromosome)
             num_sequences = len(chromosome)
             score = 0
             for i in range(len(chromosome[0])):
@@ -56,7 +55,7 @@ class GA:
         #Selection
         #Sort the population based on the score
         population_score_sorted = sorted(self.population_score, key=lambda x: x[1])
-        #Get the index of the most fitted individuals
+        #Get the index of the worst fitted individuals
         worst_fitted_individual = [item[0] for item in population_score_sorted[:config.GA_NUM_MOST_FIT_FOR_ITER]]
         #Delete individuals with the worst score 
         for index in sorted(worst_fitted_individual,reverse=True):
@@ -74,8 +73,10 @@ class GA:
         #Sort the population based on the score
         population_score_sorted = sorted(self.population_score, key=lambda x: x[1], reverse=True)
         most_fitted_individual = self.population[population_score_sorted[0][0]]     
-        
-        return most_fitted_individual,population_score_sorted[0][1]
+        #Clean all gaps that appear after the last nucleotide (if along the whole row and all columns there are only gaps)
+        utils.clean_unnecessary_gaps(most_fitted_individual)
+        final_score = utils.get_sum_of_pairs(most_fitted_individual,0,len(most_fitted_individual),0,len(most_fitted_individual[0]))
+        return most_fitted_individual,final_score
 
     def vertical_crossover(self):
         #Calculation of the mean length of a sequences, to calculate the position in which we cut every sequence in a chromosome
@@ -218,8 +219,62 @@ class GA:
                     #if(index < len(genes_to_mutate) - 1): #This is necessary due to the row with all GAP added in case the number of row for the window is not multiple of the main board rows
                     genes_to_mutate[index][from_column:to_column] = sequence
             individual_to_mutate[from_row:to_row] = genes_to_mutate
+    
+    #Perform gene mutation only on individuals with the lowest sum-of-pairs-score
+    def mutation_on_worst_fitted_individuals(self,model_path):
+        #The mutation is performed until we cover all the possible sub-board for a individual
+        self.calculate_fitness_score()
+        num_individuals_to_mutate = round(config.GA_POPULATION_SIZE * config.GA_PERCENTAGE_INDIVIDUALS_TO_MUTATE_FOR_ITER)
+        worst_fitted_individual = utils.get_index_of_the_worst_fitted_individuals(self.population_score,num_individuals_to_mutate)
+        for index in worst_fitted_individual:
+            individual_to_mutate = self.population[index]
 
+            #Check the worst fitted sub-board based on the sum-of-pairs
+            score, worst_fitted_range = utils.calculate_worst_fitted_sub_board(individual_to_mutate)
+            from_row,to_row,from_column,to_column = worst_fitted_range
 
+            #Get only the selected row
+            row_genes = individual_to_mutate[from_row:to_row]
+            sub_board = []
+
+            ##To prevent to fill the space with all gaps is better to have that the sub-board is a multiple of the main board in terms of row x column
+            ##If the main board can't be perfectly divide in slice of size AGENT_WINDOW_ROW, a raw with all GAP is added to fill the space (the RL agent won't work if size is less than the size in the training)
+            fake_row_counter = 0
+            while (len(row_genes) < config.AGENT_WINDOW_ROW):
+                all_gap_row = []
+                while (len(all_gap_row) < config.AGENT_WINDOW_COLUMN):
+                    all_gap_row.append(5)
+                fake_row_counter = fake_row_counter + 1
+                row_genes.append(all_gap_row)
+
+            for genes in row_genes:
+                sub_genes = genes[from_column:to_column]  
+                #If the main board can't be perfectly divide in slice of size AGENT_WINDOW_COLUMN, GAP is added to fill the space (the RL agent won't work if size is less than the size in the training) 
+                while len(sub_genes) < config.AGENT_WINDOW_COLUMN:
+                    sub_genes.append(5)
+                sub_board.append(sub_genes)
+
+            #Perform Mutation on the sub-board with RL
+            env = Environment(sub_board)
+            agent = DQN(env.action_number, env.row, env.max_len, env.max_len * env.max_reward)
+            agent.load(model_path)
+            state = env.reset()
+
+            while True:
+                action = agent.predict(state)
+                _, next_state, done = env.step(action)
+                state = next_state
+                if 0 == done:
+                    break
+            
+            env.padding()
+            #Put mutated genes in the right position in the individual
+            genes_to_mutate = individual_to_mutate[from_row:to_row]
+            for index,sequence in enumerate(env.aligned):
+                    #if(index < len(genes_to_mutate) - 1): #This is necessary due to the row with all GAP added in case the number of row for the window is not multiple of the main board rows
+                    genes_to_mutate[index][from_column:to_column] = sequence
+            individual_to_mutate[from_row:to_row] = genes_to_mutate
+            
 #Test
 '''
 import datasets.dataset3 as dataset3

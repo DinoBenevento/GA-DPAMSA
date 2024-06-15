@@ -29,7 +29,7 @@ def output_parameters():
     print(f"Window size:{config.AGENT_WINDOW_ROW}x{config.AGENT_WINDOW_COLUMN}")
 
 
-def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
+def inference(tag='',start=0, end=1, truncate_file=False, model_path='model', dataset=dataset):
     output_parameters()
     print("Dataset number: {}".format(len(dataset.datasets)))
 
@@ -64,8 +64,8 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
         for i in range(config.GA_NUM_ITERATION):
         
             #Mutation with the RL agent
-            ga.random_mutation(model_path)
-                
+            #ga.random_mutation(model_path)
+            ga.mutation_on_worst_fitted_individuals(model_path)   
             #Calculate the fitness score for all individuals, based on the sum-of-pairs
             ga.calculate_fitness_score()
 
@@ -75,13 +75,15 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model'):
             #Crossover, split board in two different part and create new individuals by merging each part by 
             #taking the first part from one individual and the second part from another individual
             ga.horizontal_crossover()
-        
+        #In the last iteration, we have to perform again the calculation (last operation is the crossover so we need to recheck the score) 
+        #ga.calculate_fitness_score()
         most_fitted_chromosome,sum_pairs_score = ga.get_most_fitted_chromosome()
         most_fitted_chromosome_converted = ga.get_alignment(most_fitted_chromosome)
+        print(f"Dataset name: {dataset_name}")
         print(f"SP:{sum_pairs_score}")
         print(f"Alignment:\n{most_fitted_chromosome_converted}")
-        report = f"SP:{sum_pairs_score}\nAlignment:\n{most_fitted_chromosome_converted}"
-        with open(os.path.join(config.report_path_DPAMSA_GA, "{}.rpt".format(tag)), 'a+') as report_file:
+        report = f"Dataset name: {dataset_name}\nSP: {sum_pairs_score}\nAlignment:\n{most_fitted_chromosome_converted}\n\n"
+        with open(os.path.join(config.report_path_DPAMSA_GA, "{}.rpt".format(tag)), 'a') as report_file:
             report_file.write(report)
             
 if __name__ == "__main__":
