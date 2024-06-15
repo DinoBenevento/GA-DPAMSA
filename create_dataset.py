@@ -3,8 +3,8 @@ import os
 import glob
 
 # Genera 5 sequenze casuali e le scrive in un file FASTA
-num_sequences = 6
-sequence_length = 20
+num_sequences = 3
+sequence_length = 10
 mutation_rate = 0.1  # Tasso di mutazione del 10%
 number_of_dataset = 10
 DATASET_NAME = 'DPAMSA_vs_GA'

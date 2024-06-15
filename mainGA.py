@@ -1,4 +1,4 @@
-import datasets.dataset1 as dataset1
+import datasets.DPAMSA_vs_GA as dataset1
 from GA import GA
 import torch
 import os
