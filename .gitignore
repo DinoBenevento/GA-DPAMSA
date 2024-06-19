@@ -1,4 +1,7 @@
 .devcontainer
 __pycache__/
-/datasets/fasta_files/
-/result/weightDPAMSA/
+/clustalo/
+clustalw/
+/MSAProbs
+.*
+venv/
