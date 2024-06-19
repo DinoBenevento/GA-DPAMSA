@@ -1,4 +1,4 @@
-import datasets.DPAMSA_vs_GA as dataset1
+import datasets.dataset2_6x30bp as dataset1
 from GA import GA
 import torch
 import os
@@ -13,6 +13,7 @@ dataset = dataset1
 
 
 def output_parameters():
+    print("---------- DPAMSA parameters -----------------")
     print("Gap penalty: {}".format(config.GAP_PENALTY))
     print("Mismatch penalty: {}".format(config.MISMATCH_PENALTY))
     print("Match reward: {}".format(config.MATCH_REWARD))
@@ -26,8 +27,13 @@ def output_parameters():
     print("Decrement iteration: {}".format(config.decrement_iteration))
     print("Update iteration: {}".format(config.update_iteration))
     print("Device: {}".format(config.device_name))
+    print("-------- Genetic Algorithm parameters ---------")
     print(f"Window size:{config.AGENT_WINDOW_ROW}x{config.AGENT_WINDOW_COLUMN}")
-
+    print(f"Population number: {config.GA_POPULATION_SIZE}")
+    print(f"Number of iteration: {config.GA_NUM_ITERATION}")
+    print(f"Number of most fitted individuals selected for iteration: {config.GA_NUM_MOST_FIT_FOR_ITER}")
+    print(f"Percentage of individuals to mutate for iteration (only if is used mutation on the worst-fitted individuals): {config.GA_PERCENTAGE_INDIVIDUALS_TO_MUTATE_FOR_ITER}")
+    print('\n')
 
 def inference(tag='',start=0, end=1, truncate_file=False, model_path='model', dataset=dataset):
     output_parameters()
@@ -76,7 +82,7 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model', da
             #taking the first part from one individual and the second part from another individual
             ga.horizontal_crossover()
         #In the last iteration, we have to perform again the calculation (last operation is the crossover so we need to recheck the score) 
-        #ga.calculate_fitness_score()
+        ga.calculate_fitness_score()
         most_fitted_chromosome,sum_pairs_score = ga.get_most_fitted_chromosome()
         most_fitted_chromosome_converted = ga.get_alignment(most_fitted_chromosome)
         print(f"Dataset name: {dataset_name}")
@@ -87,4 +93,4 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model', da
             report_file.write(report)
             
 if __name__ == "__main__":
-    inference(model_path='model',tag=dataset.file_name)
+    inference(model_path='model_3x30',tag=dataset.file_name)
