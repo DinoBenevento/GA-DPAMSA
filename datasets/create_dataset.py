@@ -1,12 +1,14 @@
 import random
 import os
 
-# Genera 5 sequenze casuali e le scrive in un file FASTA
+#This script is useful to create a dataset of synthetic sequences(for training and for inference) 
+
+# Generate num_sequence sequences and create a dataset with also fasta_file (useful to do comparative test)
 num_sequences = 6
-sequence_length = 30
-mutation_rate = 0.20  # Tasso di mutazione del 20%
+sequence_length = 60
+mutation_rate = 0.10  # Mutation rate 20%
 number_of_dataset = 50
-DATASET_NAME = 'dataset1_6x30bp'
+DATASET_NAME = 'training_dataset1_6x30bp'
 
 FILE_NAME_SCRIPT_OUTPUT = f'./datasets/{DATASET_NAME}.py'
 FASTA_OUTPUT = f'./datasets/fasta_files/{DATASET_NAME}'
@@ -30,7 +32,7 @@ def mutate_sequence(sequence, mutation_rate):
 def write_fasta_file(filename, sequences):
     with open(filename, 'w') as f:
         for i, seq in enumerate(sequences):
-            header = f">Sequence_{i+1}\n"  # Genera un header unico per ogni sequenza
+            header = f">Sequence_{i+1}\n"  # Header for each sequence
             f.write(header)
             f.write(seq + "\n")
 
