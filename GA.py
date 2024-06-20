@@ -275,19 +275,3 @@ class GA:
                     genes_to_mutate[index][from_column:to_column] = sequence
             individual_to_mutate[from_row:to_row] = genes_to_mutate
             
-#Test
-'''
-import datasets.dataset3 as dataset3
-
-dataset = dataset3 
-
-ga = GA(dataset.test1)
-
-ga.generate_population()
-
-ga.calculate_fitness_score()
-
-ga.selection()
-
-ga.vertical_crossover()
-'''

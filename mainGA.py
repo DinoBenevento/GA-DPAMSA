@@ -1,4 +1,4 @@
-import datasets.dataset2_6x30bp as dataset1
+import datasets.dataset2_6x60bp_GA_benc as dataset1
 from GA import GA
 import torch
 import os
@@ -81,6 +81,7 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model', da
             #Crossover, split board in two different part and create new individuals by merging each part by 
             #taking the first part from one individual and the second part from another individual
             ga.horizontal_crossover()
+            #ga.vertical_crossover()
         #In the last iteration, we have to perform again the calculation (last operation is the crossover so we need to recheck the score) 
         ga.calculate_fitness_score()
         most_fitted_chromosome,sum_pairs_score = ga.get_most_fitted_chromosome()
