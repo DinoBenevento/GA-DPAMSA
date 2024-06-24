@@ -1,4 +1,4 @@
-import datasets.dataset2_6x60bp_GA_benc as dataset1
+import datasets.training_dataset.training_dataset1_6x60bp as dataset1
 from GA import GA
 import torch
 import os
@@ -71,7 +71,7 @@ def inference(tag='',start=0, end=1, truncate_file=False, model_path='model', da
         
             #Mutation with the RL agent
             #ga.random_mutation(model_path)
-            ga.mutation_on_worst_fitted_individuals(model_path)   
+            ga.mutation_on_best_fitted_individuals_worst_sub_board(model_path)   
             #Calculate the fitness score for all individuals, based on the sum-of-pairs
             ga.calculate_fitness_score()
 

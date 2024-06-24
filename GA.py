@@ -219,14 +219,14 @@ class GA:
                     #if(index < len(genes_to_mutate) - 1): #This is necessary due to the row with all GAP added in case the number of row for the window is not multiple of the main board rows
                     genes_to_mutate[index][from_column:to_column] = sequence
             individual_to_mutate[from_row:to_row] = genes_to_mutate
-    
-    #Perform gene mutation only on individuals with the lowest sum-of-pairs-score
-    def mutation_on_worst_fitted_individuals(self,model_path):
+
+    #Perform gene mutation only on individuals with the highest sum-of-pairs-score and then apply the mutation on the worst sub-board
+    def mutation_on_best_fitted_individuals_worst_sub_board(self,model_path):
         #The mutation is performed until we cover all the possible sub-board for a individual
         self.calculate_fitness_score()
         num_individuals_to_mutate = round(config.GA_POPULATION_SIZE * config.GA_PERCENTAGE_INDIVIDUALS_TO_MUTATE_FOR_ITER)
-        worst_fitted_individual = utils.get_index_of_the_worst_fitted_individuals(self.population_score,num_individuals_to_mutate)
-        for index in worst_fitted_individual:
+        best_fitted_individual = utils.get_index_of_the_best_fitted_individuals(self.population_score,num_individuals_to_mutate)
+        for index in best_fitted_individual:
             individual_to_mutate = self.population[index]
 
             #Check the worst fitted sub-board based on the sum-of-pairs
@@ -274,4 +274,3 @@ class GA:
                     #if(index < len(genes_to_mutate) - 1): #This is necessary due to the row with all GAP added in case the number of row for the window is not multiple of the main board rows
                     genes_to_mutate[index][from_column:to_column] = sequence
             individual_to_mutate[from_row:to_row] = genes_to_mutate
-            

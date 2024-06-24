@@ -92,6 +92,15 @@ def get_index_of_the_worst_fitted_individuals(population_sorted,num_individuals)
     
     return worst_fitted_individual
 
+#Return the first num_individuals individuals with the worst score
+def get_index_of_the_best_fitted_individuals(population_sorted,num_individuals):
+    #Sort the population based on the score
+    population_score_sorted = sorted(population_sorted, key=lambda x: x[1],reverse=True)
+    #Get the index of the best fitted individuals
+    best_fitted_individual = [item[0] for item in population_score_sorted[:num_individuals]]
+    
+    return best_fitted_individual
+
 def check_if_there_are_all_gaps(row,from_index):
     for i in range(from_index, len(row)):
         if row[i] != 5:
